@@ -1,0 +1,35 @@
+GW방식:01.API 호출URL 주소생성공공데이터포털에서제공하는목록조회API입니다.[ Base URL: apis.data.go.kr/AAAAAA/api  ]
+
+=== PAGE ===
+
+공공데이터포털에서제공하는목록조회API입니다.[ Base URL: apis.data.go.kr/AAAAAA/api  ]GW방식:01.API 호출URL 주소생성Base URL을확인합니다.1통신프로토콜메소드를확인합니다.2API의호출주소를확인합니다.3호출URL 주소http://apis.data.go.kr/AAAAAA/api/file-data-list통신프로토콜\(http or https\Base URL1호출주소3통신프로토콜메소드GET통신프로토콜메소드2
+
+=== PAGE ===
+
+GW방식:02.API 파라미터확인
+
+=== PAGE ===
+
+GW방식:03.API 호출응답결과확인API 호출응답으로제공되는코드\(HTTP response status code\를확인할수있습니다.API 호출응답으로제공되는제공기관의응답코드를확인할수있습니다.호출응답의결과를확인할수있습니다.제공기관의응답에대한설명을확인할수있습니다.
+
+=== PAGE ===
+
+GW방식:Swagger-UI 기반OpenAPI 명세서활용방법ÓÓV
+^
+æ
+aþð[Hf	v
+|%y	
+A;OpenAPIqh-È¼ÕqY9a",.공공데이터포털에서제공하는목록조회API입니다.[ Base URL: apis.data.go.kr/AAAAAA/api  ]
+
+=== PAGE ===
+
+GW방식:01.API 호출\(1.API 선택및실행준비2.요청변수입력및API 호출3.API 호출명령어및호출결과확인\API 목록에서호출을원하는API를선택합니다.1`OpenAPI 실행준비’를클릭합니다.2
+
+=== PAGE ===
+
+GW방식:01.API 호출\(1.API 선택및실행준비2.요청변수입력및API 호출3.API 호출명령어및호출결과확인\필수요청파라메터표시\(dv/Þ"",\요청변수를입력한후serviceKey	
+A\(Decoding\v/3‘OpenAPI호출’을클릭하여해당API를호출합니다.4
+
+=== PAGE ===
+
+GW방식:01.API 호출\(1.API 선택및실행준비2.요청변수입력및API 호출3.API 호출명령어및호출결과확인\

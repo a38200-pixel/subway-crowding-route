@@ -1,0 +1,15 @@
+{
+  "note": "This is a placeholder sample for the Seoul Metro shortest-path API. The exact endpoint/parameters depend on Seoul Metro API docs.",
+  "sample_request_template": "https://api.seoulmetro.example/shortestpath?serviceKey={SEOUL_METRO_KEY}&startStation=강남&endStation=역삼",
+  "example_response": {
+    "status": "OK",
+    "start": "강남",
+    "end": "역삼",
+    "distance_m": 1200,
+    "duration_min": 8,
+    "route": [
+      {"station":"강남","line":"2호선","seq":1},
+      {"station":"역삼","line":"2호선","seq":2}
+    ]
+  }
+}

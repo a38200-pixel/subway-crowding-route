@@ -1,0 +1,26 @@
+{
+  "request_url": "http://apis.data.go.kr/B553766/path2",
+  "request_params": {
+    "serviceKey": "cef36f7515a8c4cc9ba407d2730abb48928957bf21322e49d7055bbc865de4f5",
+    "dataType": "JSON",
+    "dptreStn": "4307",
+    "arvlStn": "0239",
+    "searchDt": "2026-06-30 16:49:41",
+    "searchType": "duration",
+    "exclTrfstns": "",
+    "thrghStns": "",
+    "schInclYn": "Y",
+    "stationValueType": "code"
+  },
+  "raw_response": {
+    "status_code": 500,
+    "reason": "Internal Server Error",
+    "text": "Unexpected errors\n"
+  },
+  "normalized_response": {
+    "start_station": "4307",
+    "end_station": "0239",
+    "route_type": "min_time",
+    "error": "HTTP Error 500: Internal Server Error"
+  }
+}
