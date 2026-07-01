@@ -1,1 +1,4 @@
 pandas
+Pillow
+fastapi
+uvicorn
