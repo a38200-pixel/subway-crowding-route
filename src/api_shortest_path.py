@@ -1,3 +1,5 @@
+"""서울 지하철 최단경로 API 호출과 응답 정규화를 담당하는 모듈."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -26,6 +28,7 @@ ROUTE_TYPE_MAP = {
 }
 
 
+# .env 파일을 읽어 API 키와 설정을 환경변수로 적재한다.
 def load_env_file(env_path: Path = ENV_PATH) -> None:
     if not env_path.exists():
         return
@@ -37,12 +40,20 @@ def load_env_file(env_path: Path = ENV_PATH) -> None:
 
         key, value = line.split("=", 1)
         key = key.strip()
-        value = value.strip().strip('"').strip("'")
+        value = value.strip()
+
+        # Support inline comments in .env like:
+        # SEOUL_METRO_KEY=xxxxx  # comment
+        if value and value[0] not in {"'", '"'} and " #" in value:
+            value = value.split(" #", 1)[0].rstrip()
+
+        value = value.strip('"').strip("'")
 
         if key and key not in os.environ:
             os.environ[key] = value
 
 
+# 최단경로 API 키를 환경변수에서 읽어온다.
 def get_shortest_path_api_key() -> str:
     load_env_file()
     api_key = os.getenv("SEOUL_METRO_KEY", "").strip()
@@ -51,6 +62,7 @@ def get_shortest_path_api_key() -> str:
     return api_key
 
 
+# 앱 내부 route_type 값을 외부 API 파라미터 값으로 변환한다.
 def resolve_route_type(route_type: str) -> str:
     normalized = route_type.strip().lower()
     if normalized not in ROUTE_TYPE_MAP:
@@ -60,10 +72,12 @@ def resolve_route_type(route_type: str) -> str:
     return ROUTE_TYPE_MAP[normalized]
 
 
+# searchDt 기본값으로 사용할 현재 시각 문자열을 만든다.
 def _now_search_dt() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
+# station_master.csv를 로드하고 역 코드 조회에 필요한 필드를 정리한다.
 def load_station_master() -> list[dict[str, str]]:
     if not STATION_MASTER_PATH.exists():
         raise FileNotFoundError(f"station_master.csv not found: {STATION_MASTER_PATH}")
@@ -87,6 +101,7 @@ def load_station_master() -> list[dict[str, str]]:
     return normalized_rows
 
 
+# 역명과 호선을 기준으로 최단경로 API용 역 코드를 찾는다.
 def resolve_station_code(
     station_name: str,
     *,
@@ -119,6 +134,7 @@ def resolve_station_code(
     return deduped[0]["shortest_path_station_code"]
 
 
+# 최단경로 API 요청 파라미터를 조립한다.
 def build_request_params(
     start_station: str,
     end_station: str,
@@ -152,6 +168,7 @@ def build_request_params(
     return params
 
 
+# 역 목록에서 중복을 제거하되 기존 순서는 유지한다.
 def _dedupe_keep_order(values: list[str]) -> list[str]:
     seen: set[str] = set()
     result: list[str] = []
@@ -162,6 +179,7 @@ def _dedupe_keep_order(values: list[str]) -> list[str]:
     return result
 
 
+# 최단경로 원본 응답을 앱에서 쓰기 쉬운 구조로 정규화한다.
 def normalize_shortest_path_response(
     raw_response: Any,
     *,
@@ -238,6 +256,7 @@ def normalize_shortest_path_response(
     }
 
 
+# 요청/응답/정규화 결과를 JSON 파일로 저장한다.
 def save_path_result(
     save_path: str | Path,
     *,
@@ -257,6 +276,7 @@ def save_path_result(
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 최단경로 API를 직접 호출하고 응답을 정규화한다.
 def fetch_shortest_path(
     start_station: str,
     end_station: str,
@@ -382,6 +402,7 @@ def fetch_shortest_path(
         return result
 
 
+# 역명 기반 입력을 역 코드로 변환한 뒤 최단경로 API를 호출한다.
 def fetch_shortest_path_by_name(
     start_station_name: str,
     end_station_name: str,
@@ -420,6 +441,7 @@ def fetch_shortest_path_by_name(
     )
 
 
+# 외부에서 바로 호출하기 좋은 최단경로 래퍼 함수다.
 def get_seoul_metro_shortest_path(
     start_station: str,
     end_station: str,

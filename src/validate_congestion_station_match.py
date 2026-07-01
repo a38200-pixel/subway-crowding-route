@@ -1,3 +1,5 @@
+"""혼잡도 CSV와 station_master의 역 매칭 상태를 검증하는 스크립트."""
+
 from pathlib import Path
 import re
 
@@ -21,6 +23,7 @@ UNMATCHED_OUTPUT_PATH = BASE_DIR / "data" / "processed" / "unmatched_congestion_
 # 2. 역명 정규화 함수
 # =========================================================
 
+# 역명을 비교용 표준 형태로 정규화한다.
 def normalize_station_name(name: str) -> str:
     if pd.isna(name):
         return ""
@@ -47,6 +50,7 @@ def normalize_station_name(name: str) -> str:
 # 3. 호선명 정리 함수
 # =========================================================
 
+# 호선명을 비교용 표준 형태로 정규화한다.
 def normalize_line_name(line: str) -> str:
     if pd.isna(line):
         return ""
@@ -67,6 +71,7 @@ def normalize_line_name(line: str) -> str:
 # 4. 매칭 검증
 # =========================================================
 
+# 혼잡도 데이터의 station_key가 station_master와 정확히 맞는지 점검한다.
 def validate_match() -> None:
     congestion_df = pd.read_csv(CONGESTION_PATH, encoding="utf-8-sig")
     station_df = pd.read_csv(STATION_MASTER_PATH, encoding="utf-8-sig")

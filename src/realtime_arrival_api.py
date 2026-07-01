@@ -1,3 +1,5 @@
+"""실시간 도착정보 API를 조회하고 첫 구간 탑승 ETA 후보를 고르는 모듈."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -17,6 +19,7 @@ ENV_PATH = BASE_DIR / ".env"
 NO_PROXY_OPENER = build_opener(ProxyHandler({}))
 
 
+# .env 파일을 읽어 실시간 도착 API 키를 환경변수에 적재한다.
 def load_env_file(env_path: Path = ENV_PATH) -> None:
     if not env_path.exists():
         return
@@ -28,12 +31,20 @@ def load_env_file(env_path: Path = ENV_PATH) -> None:
 
         key, value = line.split("=", 1)
         key = key.strip()
-        value = value.strip().strip('"').strip("'")
+        value = value.strip()
+
+        # Support inline comments in .env like:
+        # SEOUL_API_KEY=xxxxx  # comment
+        if value and value[0] not in {"'", '"'} and " #" in value:
+            value = value.split(" #", 1)[0].rstrip()
+
+        value = value.strip('"').strip("'")
 
         if key and key not in os.environ:
             os.environ[key] = value
 
 
+# 실시간 도착 API 키를 환경변수에서 읽어온다.
 def get_realtime_api_key() -> str:
     load_env_file()
     api_key = (os.getenv("SEOUL_API_KEY") or os.getenv("SEOUL_SUBWAY_API_KEY") or "").strip()
@@ -42,6 +53,7 @@ def get_realtime_api_key() -> str:
     return api_key
 
 
+# 출발역과 호선 기준으로 실시간 도착 API 조회에 필요한 역 컨텍스트를 찾는다.
 def resolve_departure_station_for_arrival(
     station_name: str,
     *,
@@ -75,6 +87,7 @@ def resolve_departure_station_for_arrival(
     }
 
 
+# subway_id를 호선명으로 역매핑하기 위한 사전을 만든다.
 def build_subway_id_line_map(station_rows: list[dict[str, str]]) -> dict[str, str]:
     mapping: dict[str, str] = {}
     for row in station_rows:
@@ -85,6 +98,7 @@ def build_subway_id_line_map(station_rows: list[dict[str, str]]) -> dict[str, st
     return mapping
 
 
+# 서울 열린데이터 실시간 도착 API를 호출한다.
 def call_realtime_arrival(api_station_name: str, start: int = 0, end: int = 10) -> dict[str, Any]:
     api_key = get_realtime_api_key()
     encoded_station_name = quote(api_station_name, safe="")
@@ -100,6 +114,7 @@ def call_realtime_arrival(api_station_name: str, start: int = 0, end: int = 10) 
     return json.loads(body_text)
 
 
+# API 수신 시각 문자열을 datetime으로 파싱한다.
 def _parse_recptn_dt(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -109,6 +124,7 @@ def _parse_recptn_dt(value: str | None) -> datetime | None:
         return None
 
 
+# 값이 비정상이면 None을 반환하는 정수 파서다.
 def _safe_int(value: Any) -> int | None:
     try:
         return int(str(value).strip())
@@ -116,6 +132,7 @@ def _safe_int(value: Any) -> int | None:
         return None
 
 
+# ETA 초 값을 사람이 읽기 쉬운 문자열로 바꾼다.
 def _format_eta(seconds: int | None) -> str | None:
     if seconds is None:
         return None
@@ -129,12 +146,14 @@ def _format_eta(seconds: int | None) -> str | None:
     return f"{minutes}분 {remain}초"
 
 
+# 열차 행선 문자열에서 종착역 부분만 추출한다.
 def _extract_destination(train_line_name: str | None) -> str | None:
     if not train_line_name:
         return None
     return train_line_name.split(" - ", 1)[0].strip()
 
 
+# 실시간 도착 원본 행을 앱에서 쓰는 공통 형태로 정규화한다.
 def normalize_realtime_arrival_item(
     item: dict[str, Any],
     *,
@@ -175,6 +194,7 @@ def normalize_realtime_arrival_item(
     }
 
 
+# 첫 구간의 호선과 방향에 맞는 도착정보만 남긴다.
 def filter_arrivals_for_first_segment(
     arrivals: list[dict[str, Any]],
     *,
@@ -193,6 +213,7 @@ def filter_arrivals_for_first_segment(
     return filtered
 
 
+# ETA 기준으로 가장 빠른 도착 후보 n개를 고른다.
 def select_fastest_arrivals(arrivals: list[dict[str, Any]], limit: int = 2) -> list[dict[str, Any]]:
     def sort_key(item: dict[str, Any]) -> tuple[int, str]:
         eta = item.get("arrival_eta_seconds")
@@ -201,6 +222,7 @@ def select_fastest_arrivals(arrivals: list[dict[str, Any]], limit: int = 2) -> l
     return sorted(arrivals, key=sort_key)[:limit]
 
 
+# 최단경로 첫 구간에 실제로 탈 수 있는 실시간 열차 도착 후보를 반환한다.
 def get_realtime_arrivals_for_shortest_path(
     start_station_name: str,
     end_station_name: str,
